@@ -1,0 +1,35 @@
+﻿@model inTouch_demo.Models.ResetRequest
+@{
+    ViewData["Title"] = "Password Reset";
+}
+
+<h2>Reset OS Password</h2>
+
+<form method="post">
+    <div>
+        <label>Username:</label>
+        <select asp-for="Username">
+            <option value="">-- Select User --</option>
+            @foreach (var user in ViewBag.Users as List<string>)
+            {
+                <option value="@user">@user</option>
+            }
+        </select>
+    </div>
+
+    <div>
+        <label>New Password:</label>
+        <input type="password" asp-for="NewPassword" />
+    </div>
+
+    <div>
+        <button type="submit">Reset Password</button>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.Result))
+    {
+        <div style="margin-top:10px; color: blue;">
+            <strong>Result:</strong> @Model.Result
+        </div>
+    }
+</form>
