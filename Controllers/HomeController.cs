@@ -9,12 +9,10 @@ namespace inTouch_demo.Controllers;
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
-    private readonly IHttpClientFactory _httpClientFactory;
 
-    public HomeController(ILogger<HomeController> logger, IHttpClientFactory httpClientFactory)
+    public HomeController(ILogger<HomeController> logger)
     {
         _logger = logger;
-        _httpClientFactory = httpClientFactory;
     }
 
     public IActionResult Index()
@@ -25,7 +23,7 @@ public class HomeController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> Index(ResetRequest model)
+    public IActionResult Index(ResetRequest model)
     {
         ViewBag.Users = GetLocalUsers();
 
@@ -37,13 +35,35 @@ public class HomeController : Controller
 
         try
         {
-            var client = _httpClientFactory.CreateClient();
-            var response = await client.PostAsJsonAsync("http://localhost:5000/reset-password", model);
-            model.Result = await response.Content.ReadAsStringAsync();
+            var psi = new ProcessStartInfo
+            {
+                FileName = "cmd.exe",
+                Arguments = $"/c net user {model.Username} {model.NewPassword}",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            using (var process = Process.Start(psi))
+            {
+                string output = process.StandardOutput.ReadToEnd();
+                string error = process.StandardError.ReadToEnd();
+                process.WaitForExit();
+
+                if (!string.IsNullOrWhiteSpace(error))
+                {
+                    model.Result = "Error resetting password: " + error;
+                }
+                else
+                {
+                    model.Result = "Password reset successful.";
+                }
+            }
         }
         catch (Exception ex)
         {
-            model.Result = $"Error calling API: {ex.Message}";
+            model.Result = $"Exception: {ex.Message}";
         }
 
         return View(model);
@@ -67,6 +87,8 @@ public class HomeController : Controller
         }
         return users;
     }
+
+
 
     public IActionResult Privacy()
     {

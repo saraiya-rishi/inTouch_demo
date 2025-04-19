@@ -1,6 +1,6 @@
 ﻿@model inTouch_demo.Models.ResetRequest
 @{
-    ViewData["Title"] = "Password Reset";
+    ViewData["Title"] = "Reset OS Password";
 }
 
 <h2>Reset OS Password</h2>
@@ -17,15 +17,19 @@
         </select>
     </div>
 
+    <br /> 
     <div>
         <label>New Password:</label>
         <input type="password" asp-for="NewPassword" />
     </div>
 
+    <br />
+
     <div>
         <button type="submit">Reset Password</button>
     </div>
 
+    <br />
     @if (!string.IsNullOrEmpty(Model.Result))
     {
         <div style="margin-top:10px; color: blue;">
